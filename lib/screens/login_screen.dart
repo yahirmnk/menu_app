@@ -1,0 +1,61 @@
+import 'package:flutter/material.dart';
+import '../services/mongo_service.dart';
+import 'home_screen.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final MongoService _mongoService = MongoService();
+  bool _loading = false;
+  String? _error;
+
+  void _login() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final user = await _mongoService.login(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+    setState(() => _loading = false);
+
+    if (user != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+      );
+    } else {
+      setState(() => _error = "Credenciales inválidas");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Login")),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(controller: _emailController, decoration: const InputDecoration(labelText: "Email")),
+            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: "Contraseña"), obscureText: true),
+            const SizedBox(height: 20),
+            if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
+            ElevatedButton(
+              onPressed: _loading ? null : _login,
+              child: _loading ? const CircularProgressIndicator(color: Colors.white) : const Text("Ingresar"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
