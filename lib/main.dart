@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'services/mongo_service.dart';
 import 'screens/login_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Necesario antes de llamadas async
+
+  // Prueba de conexión a la API
+  final mongoService = MongoService();
+  final diets = await mongoService.getDiets(); // Cambia por getRecipesByDiet o login si quieres
+
+  print("✅ Dietas obtenidas: $diets");
+
   runApp(const MyApp());
 }
 

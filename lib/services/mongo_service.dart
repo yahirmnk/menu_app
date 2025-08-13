@@ -6,73 +6,76 @@ import '../models/recipe.dart';
 import '../models/diet.dart';
 
 class MongoService {
-  final String baseUrl = apiBaseUrl; // Definido en config.dart
+  final String baseUrl = "$apiBaseUrl/api"; // /api definido solo aquí
+
+  /// Método genérico para peticiones GET
+  Future<dynamic> _getRequest(String endpoint) async {
+    try {
+      final url = Uri.parse("$baseUrl/$endpoint");
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        print("❌ Error GET [$endpoint]: ${response.statusCode} -> ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("❌ Excepción GET [$endpoint]: $e");
+      return null;
+    }
+  }
+
+  /// Método genérico para peticiones POST
+  Future<dynamic> _postRequest(String endpoint, Map<String, dynamic> body) async {
+    try {
+      final url = Uri.parse("$baseUrl/$endpoint");
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        print("❌ Error POST [$endpoint]: ${response.statusCode} -> ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("❌ Excepción POST [$endpoint]: $e");
+      return null;
+    }
+  }
 
   /// LOGIN
   Future<User?> login(String correo, String password) async {
-    final url = Uri.parse("$baseUrl/api/users/login");
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"correo": correo, "contrasena": password}),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return User.fromJson(data);
-    } else {
-      print("Error en el inicio de sesion: ${response.statusCode} -> ${response.body}");
-      return null;
-    }
+    final data = await _postRequest("users/login", {
+      "correo": correo,
+      "contrasena": password
+    });
+    return data != null ? User.fromJson(data) : null;
   }
 
   /// REGISTRO
   Future<User?> register(String nombre, String correo, String password) async {
-    final url = Uri.parse("$baseUrl/api/users/register");
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "nombre": nombre,
-        "correo": correo,
-        "contrasena": password
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      return User.fromJson(data);
-    } else {
-      print("Error en registro: ${response.statusCode} -> ${response.body}");
-      return null;
-    }
+    final data = await _postRequest("users/register", {
+      "nombre": nombre,
+      "correo": correo,
+      "contrasena": password
+    });
+    return data != null ? User.fromJson(data) : null;
   }
 
   /// OBTENER RECETAS POR DIETA
   Future<List<Recipe>> getRecipesByDiet(String dietTag) async {
-    final url = Uri.parse("$baseUrl/api/recipes?dietTag=$dietTag");
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((e) => Recipe.fromJson(e)).toList();
-    } else {
-      print("Error al obtener recetas: ${response.statusCode} -> ${response.body}");
-      return [];
-    }
+    final data = await _getRequest("recipes?dietTag=$dietTag");
+    return data != null ? (data as List).map((e) => Recipe.fromJson(e)).toList() : [];
   }
 
   /// OBTENER TODAS LAS DIETAS
   Future<List<Diet>> getDiets() async {
-    final url = Uri.parse("$baseUrl/api/diets");
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((e) => Diet.fromJson(e)).toList();
-    } else {
-      print("Error al obtener dietas: ${response.statusCode} -> ${response.body}");
-      return [];
-    }
+    final data = await _getRequest("diets");
+    return data != null ? (data as List).map((e) => Diet.fromJson(e)).toList() : [];
   }
 }
