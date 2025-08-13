@@ -9,22 +9,23 @@ class MongoService {
   final String baseUrl = apiBaseUrl; // Definido en config.dart
 
   /// LOGIN
-  Future<User?> login(String correo, String password) async {
+  Future<User?> login(String email, String password) async {
     final url = Uri.parse("$baseUrl/api/users/login");
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"correo": correo, "contrasena": password}),
+      body: jsonEncode({"email": email, "contrasena": password}),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return User.fromJson(data);
     } else {
-      print("Error en el inicio de sesion: ${response.statusCode} -> ${response.body}");
+      print("Error en el inicio de sesión: ${response.statusCode} -> ${response.body}");
       return null;
     }
   }
+
 
   /// OBTENER RECETAS POR DIETA
   Future<List<Recipe>> getRecipesByDiet(String dietTag) async {
