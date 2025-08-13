@@ -10,7 +10,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
+  final _correoController = TextEditingController();
   final _passwordController = TextEditingController();
   final MongoService _mongoService = MongoService();
   bool _loading = false;
@@ -22,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     final user = await _mongoService.login(
-      _emailController.text.trim(),
+      _correoController.text.trim(),
       _passwordController.text.trim(),
     );
     setState(() => _loading = false);
@@ -45,13 +45,22 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(labelText: "Email")),
-            TextField(controller: _passwordController, decoration: const InputDecoration(labelText: "Contraseña"), obscureText: true),
+            TextField(
+              controller: _correoController,
+              decoration: const InputDecoration(labelText: "Correo"),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: "Contraseña"),
+              obscureText: true,
+            ),
             const SizedBox(height: 20),
             if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
             ElevatedButton(
               onPressed: _loading ? null : _login,
-              child: _loading ? const CircularProgressIndicator(color: Colors.white) : const Text("Ingresar"),
+              child: _loading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Ingresar"),
             ),
           ],
         ),

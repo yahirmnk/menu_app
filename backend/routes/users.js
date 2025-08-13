@@ -5,21 +5,20 @@ const bcrypt = require("bcrypt");
 
 // Registro de usuario
 router.post("/register", async (req, res) => {
-  const { nombre, email, contrasena } = req.body;
+  const { nombre, correo, contrasena } = req.body;
 
   console.log("📥 Datos recibidos para registro:", req.body);
 
   try {
     // Verificar campos requeridos
-    if (!nombre || !email || !contrasena) {
+    if (!nombre || !correo || !contrasena) {
       console.error("❌ Faltan campos requeridos");
       return res.status(400).json({ message: "Todos los campos son obligatorios" });
     }
 
     // Buscar usuario existente
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ correo });
     if (existingUser) {
-      console.warn("⚠️ El usuario ya existe:", email);
       return res.status(400).json({ message: "El usuario ya existe" });
     }
 
@@ -27,7 +26,7 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
     // Crear usuario nuevo
-    const newUser = new User({ nombre, email, contrasena: hashedPassword });
+    const newUser = new User({ nombre, correo, contrasena: hashedPassword });
     await newUser.save();
 
     console.log("✅ Usuario registrado correctamente:", newUser);
@@ -41,28 +40,28 @@ router.post("/register", async (req, res) => {
 
 // Login de usuario
 router.post("/login", async (req, res) => {
-  const { email, contrasena } = req.body;
+  const { correo, contrasena } = req.body;
 
   console.log("📥 Intento de login:", req.body);
 
   try {
-    if (!email || !contrasena) {
-      return res.status(400).json({ message: "Email y contraseña requeridos" });
+    if (!correo || !contrasena) {
+      return res.status(400).json({ message: "Correo y contraseña requeridos" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ correo });
     if (!user) {
-      console.warn("⚠️ Usuario no encontrado:", email);
+      console.warn("⚠️ Usuario no encontrado:", correo);
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
     const isMatch = await bcrypt.compare(contrasena, user.contrasena);
     if (!isMatch) {
-      console.warn("⚠️ Contraseña incorrecta para:", email);
+      console.warn("⚠️ Contraseña incorrecta para:", correo);
       return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
-    console.log("✅ Login exitoso:", email);
+    console.log("✅ Login exitoso:", correo);
     res.json(user);
   } catch (error) {
     console.error("💥 Error en login:", error);
