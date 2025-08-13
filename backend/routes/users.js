@@ -31,7 +31,11 @@ router.post("/register", async (req, res) => {
 
     console.log("✅ Usuario registrado correctamente:", newUser);
 
-    res.status(201).json({ message: "Usuario registrado", user: newUser });
+    // Evitar enviar la contraseña en la respuesta
+    const userResponse = newUser.toObject();
+    delete userResponse.contrasena;
+
+    res.status(201).json({ message: "Usuario registrado", user: userResponse });
   } catch (error) {
     console.error("💥 Error en registro:", error);
     res.status(500).json({ message: "Error interno", error: error.message });
@@ -62,7 +66,12 @@ router.post("/login", async (req, res) => {
     }
 
     console.log("✅ Login exitoso:", correo);
-    res.json(user);
+
+    // Evitar enviar la contraseña
+    const userResponse = user.toObject();
+    delete userResponse.contrasena;
+
+    res.json(userResponse);
   } catch (error) {
     console.error("💥 Error en login:", error);
     res.status(500).json({ message: "Error interno", error: error.message });
@@ -70,3 +79,4 @@ router.post("/login", async (req, res) => {
 });
 
 module.exports = router;
+
