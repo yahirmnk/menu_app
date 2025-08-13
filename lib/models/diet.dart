@@ -11,7 +11,7 @@ class Diet {
 
   factory Diet.fromJson(Map<String, dynamic> json) {
     return Diet(
-      id: json["_id"]["\$oid"],
+      id: json["_id"],
       nombre: json["nombre"],
       tag: json["tag"],
     );

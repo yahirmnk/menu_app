@@ -6,7 +6,7 @@ import '../models/recipe.dart';
 import '../models/diet.dart';
 
 class MongoService {
-  final String baseUrl = "$apiBaseUrl/api"; // /api definido solo aquí
+  final String baseUrl = "$apiBaseUrl/api";
 
   /// Método genérico para peticiones GET
   Future<dynamic> _getRequest(String endpoint) async {
@@ -54,7 +54,18 @@ class MongoService {
       "correo": correo,
       "contrasena": password
     });
-    return data != null ? User.fromJson(data) : null;
+
+    if (data != null) {
+      // Si el backend envía directamente el usuario
+      if (data is Map<String, dynamic>) {
+        return User.fromJson(data);
+      }
+      // Si el backend lo envía dentro de una clave "user"
+      if (data is Map && data.containsKey("user")) {
+        return User.fromJson(data["user"]);
+      }
+    }
+    return null;
   }
 
   /// REGISTRO
@@ -64,7 +75,16 @@ class MongoService {
       "correo": correo,
       "contrasena": password
     });
-    return data != null ? User.fromJson(data) : null;
+
+    if (data != null) {
+      if (data is Map<String, dynamic>) {
+        if (data.containsKey("user")) {
+          return User.fromJson(data["user"]);
+        }
+        return User.fromJson(data);
+      }
+    }
+    return null;
   }
 
   /// OBTENER RECETAS POR DIETA

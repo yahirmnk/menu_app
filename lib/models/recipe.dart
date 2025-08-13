@@ -23,7 +23,7 @@ class Recipe {
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
-      id: json["_id"] is Map ? json["_id"]["\$oid"] : json["_id"].toString(),
+      id: json["_id"] is Map ? json["_id"]: json["_id"].toString(),
       title: json["titulo"],
       dietTag: json["dietTag"],
       prepTime: json["tiempoPreparacion"] ?? "",
