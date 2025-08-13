@@ -6,4 +6,4 @@
 // Ejemplo: 192.168.0.15
 //IP real: 192.168.100.66
 //render url: https://menu-app-hoie.onrender.com
-const String apiBaseUrl = "https://menu-app-hoie.onrender.com/api";
+const String apiBaseUrl = "https://menu-app-hoie.onrender.com";
