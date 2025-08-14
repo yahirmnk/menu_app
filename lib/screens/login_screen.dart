@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:menu_fit/screens/register_screnn.dart';
 import '../services/mongo_service.dart';
 import 'home_screen.dart';
+
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -64,6 +67,22 @@ class _LoginScreenState extends State<LoginScreen> {
               child: _loading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text("Ingresar"),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("¿No tienes cuenta? "),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                    );
+                  },
+                  child: const Text("Crear cuenta"),
+                ),
+              ],
             ),
           ],
         ),
