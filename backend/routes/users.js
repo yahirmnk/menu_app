@@ -5,9 +5,10 @@ const bcrypt = require("bcrypt");
 
 // Registro de usuario
 router.post("/register", async (req, res) => {
-  const { nombre, correo, contrasena } = req.body;
+  let { nombre, correo, contrasena } = req.body;
+  correo = String(correo || "").trim().toLowerCase();
 
-  console.log("📥 Datos recibidos para registro:", req.body);
+  console.log("📥 Datos recibidos para registro:", { nombre, correo, contrasena });
 
   try {
     if (!nombre || !correo || !contrasena) {
@@ -17,11 +18,17 @@ router.post("/register", async (req, res) => {
 
     const existingUser = await User.findOne({ correo });
     if (existingUser) {
+      console.warn("⚠️ Usuario ya existe:", correo);
       return res.status(400).json({ message: "El usuario ya existe" });
     }
 
     const hashedPassword = await bcrypt.hash(contrasena, 10);
-    const newUser = new User({ nombre, correo, contrasena: hashedPassword });
+    const newUser = new User({ 
+      nombre, 
+      correo, 
+      contrasena: hashedPassword 
+    });
+    
     await newUser.save();
 
     console.log("✅ Usuario registrado correctamente:", newUser);
@@ -43,12 +50,14 @@ router.post("/register", async (req, res) => {
 
 // Login de usuario
 router.post("/login", async (req, res) => {
-  const { correo, contrasena } = req.body;
+  let { correo, contrasena } = req.body;
+  correo = String(correo || "").trim().toLowerCase();
 
-  console.log("📥 Intento de login:", req.body);
+  console.log("📥 Intento de login:", { correo, contrasena });
 
   try {
     if (!correo || !contrasena) {
+      console.error("❌ Faltan credenciales");
       return res.status(400).json({ message: "Correo y contraseña requeridos" });
     }
 
