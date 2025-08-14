@@ -10,30 +10,27 @@ router.post("/register", async (req, res) => {
   console.log("📥 Datos recibidos para registro:", req.body);
 
   try {
-    // Verificar campos requeridos
     if (!nombre || !correo || !contrasena) {
       console.error("❌ Faltan campos requeridos");
       return res.status(400).json({ message: "Todos los campos son obligatorios" });
     }
 
-    // Buscar usuario existente
     const existingUser = await User.findOne({ correo });
     if (existingUser) {
       return res.status(400).json({ message: "El usuario ya existe" });
     }
 
-    // Hashear contraseña
     const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-    // Crear usuario nuevo
     const newUser = new User({ nombre, correo, contrasena: hashedPassword });
     await newUser.save();
 
     console.log("✅ Usuario registrado correctamente:", newUser);
 
-    // Evitar enviar la contraseña en la respuesta
     const userResponse = newUser.toObject();
     delete userResponse.contrasena;
+
+    // Forzar _id como string
+    userResponse._id = newUser._id.toString();
 
     res.status(201).json({ message: "Usuario registrado", user: userResponse });
   } catch (error) {
@@ -67,9 +64,11 @@ router.post("/login", async (req, res) => {
 
     console.log("✅ Login exitoso:", correo);
 
-    // Evitar enviar la contraseña
     const userResponse = user.toObject();
     delete userResponse.contrasena;
+
+    // Forzar _id como string
+    userResponse._id = user._id.toString();
 
     res.json(userResponse);
   } catch (error) {
