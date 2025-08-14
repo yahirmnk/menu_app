@@ -17,25 +17,28 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
 
   void _login() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    final user = await _mongoService.login(
-      _correoController.text.trim(),
-      _passwordController.text.trim(),
-    );
-    setState(() => _loading = false);
+  setState(() {
+    _loading = true;
+    _error = null;
+  });
 
-    if (user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
-      );
-    } else {
-      setState(() => _error = "Credenciales inválidas");
-    }
+  final user = await _mongoService.login(
+    _correoController.text.trim(),
+    _passwordController.text.trim(),
+  );
+
+  setState(() => _loading = false);
+
+  if (user != null) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+    );
+  } else {
+    setState(() => _error = "Correo o contraseña inválidos"); // o usa un SnackBar
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

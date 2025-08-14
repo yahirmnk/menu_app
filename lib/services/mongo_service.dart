@@ -6,96 +6,133 @@ import '../models/recipe.dart';
 import '../models/diet.dart';
 
 class MongoService {
+  // Asegúrate que en config.dart tengas:
+  // const String apiBaseUrl = "https://menu-app-hoie.onrender.com";
   final String baseUrl = "$apiBaseUrl/api";
 
-  /// Método genérico para peticiones GET
-  Future<dynamic> _getRequest(String endpoint) async {
+  // -------- utilidades internas --------
+  Future<Map<String, dynamic>?> _post(String endpoint, Map<String, dynamic> body) async {
     try {
       final url = Uri.parse("$baseUrl/$endpoint");
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        print("❌ Error GET [$endpoint]: ${response.statusCode} -> ${response.body}");
-        return null;
-      }
-    } catch (e) {
-      print("❌ Excepción GET [$endpoint]: $e");
-      return null;
-    }
-  }
-
-  /// Método genérico para peticiones POST
-  Future<dynamic> _postRequest(String endpoint, Map<String, dynamic> body) async {
-    try {
-      final url = Uri.parse("$baseUrl/$endpoint");
-      final response = await http.post(
+      final res = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
-      } else {
-        print("❌ Error POST [$endpoint]: ${response.statusCode} -> ${response.body}");
-        return null;
+      // 200/201 -> OK
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return jsonDecode(res.body) as Map<String, dynamic>;
+      }
+      // Otros códigos -> intento parsear para mostrar mensaje del backend
+      try {
+        final parsed = jsonDecode(res.body);
+        final msg = (parsed is Map && parsed['message'] is String)
+            ? parsed['message']
+            : 'Error ${res.statusCode}';
+        throw Exception(msg);
+      } catch (_) {
+        throw Exception('Error ${res.statusCode}: ${res.body}');
       }
     } catch (e) {
-      print("❌ Excepción POST [$endpoint]: $e");
+      rethrow;
+    }
+  }
+
+  Future<dynamic> _get(String endpoint) async {
+    try {
+      final url = Uri.parse("$baseUrl/$endpoint");
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body);
+      }
+      try {
+        final parsed = jsonDecode(res.body);
+        final msg = (parsed is Map && parsed['message'] is String)
+            ? parsed['message']
+            : 'Error ${res.statusCode}';
+        throw Exception(msg);
+      } catch (_) {
+        throw Exception('Error ${res.statusCode}: ${res.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // -------- auth --------
+  /// Login: espera del backend { message, user: { ... } }
+  Future<User?> login(String correo, String password) async {
+    try {
+      final data = await _post("users/login", {
+        "correo": correo,
+        "contrasena": password,
+      });
+
+      if (data == null) return null;
+
+      // preferimos el formato unificado { message, user }
+      if (data.containsKey('user') && data['user'] is Map<String, dynamic>) {
+        return User.fromJson(data); // tu User.fromJson ya soporta "user"
+      }
+
+      // fallback por si el backend alguna vez devuelve el usuario plano
+      return User.fromJson(data);
+    } catch (e) {
+      // Log opcional
+      // ignore: avoid_print
+      print("❌ Error en login: $e");
       return null;
     }
   }
 
-  /// LOGIN
-  Future<User?> login(String correo, String password) async {
-    final data = await _postRequest("users/login", {
-      "correo": correo,
-      "contrasena": password
-    });
-
-    if (data != null) {
-      // Si el backend envía directamente el usuario
-      if (data is Map<String, dynamic>) {
-        return User.fromJson(data);
-      }
-      // Si el backend lo envía dentro de una clave "user"
-      if (data is Map && data.containsKey("user")) {
-        return User.fromJson(data["user"]);
-      }
-    }
-    return null;
-  }
-
-  /// REGISTRO
+  /// Registro: espera del backend { message, user: { ... } }
   Future<User?> register(String nombre, String correo, String password) async {
-    final data = await _postRequest("users/register", {
-      "nombre": nombre,
-      "correo": correo,
-      "contrasena": password
-    });
+    try {
+      final data = await _post("users/register", {
+        "nombre": nombre,
+        "correo": correo,
+        "contrasena": password,
+      });
 
-    if (data != null) {
-      if (data is Map<String, dynamic>) {
-        if (data.containsKey("user")) {
-          return User.fromJson(data["user"]);
-        }
+      if (data == null) return null;
+
+      if (data.containsKey('user') && data['user'] is Map<String, dynamic>) {
         return User.fromJson(data);
       }
+      return User.fromJson(data);
+    } catch (e) {
+      // ignore: avoid_print
+      print("❌ Error en registro: $e");
+      return null;
     }
-    return null;
   }
 
-  /// OBTENER RECETAS POR DIETA
-  Future<List<Recipe>> getRecipesByDiet(String dietTag) async {
-    final data = await _getRequest("recipes?dietTag=$dietTag");
-    return data != null ? (data as List).map((e) => Recipe.fromJson(e)).toList() : [];
-  }
-
-  /// OBTENER TODAS LAS DIETAS
+  // -------- dietas y recetas (si ya las usas) --------
   Future<List<Diet>> getDiets() async {
-    final data = await _getRequest("diets");
-    return data != null ? (data as List).map((e) => Diet.fromJson(e)).toList() : [];
+    try {
+      final data = await _get("diets");
+      if (data is List) {
+        return data.map((e) => Diet.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      return [];
+    } catch (e) {
+      // ignore: avoid_print
+      print("❌ Error getDiets: $e");
+      return [];
+    }
+  }
+
+  Future<List<Recipe>> getRecipesByDiet(String dietTag) async {
+    try {
+      final data = await _get("recipes?dietTag=$dietTag");
+      if (data is List) {
+        return data.map((e) => Recipe.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      return [];
+    } catch (e) {
+      // ignore: avoid_print
+      print("❌ Error getRecipesByDiet: $e");
+      return [];
+    }
   }
 }

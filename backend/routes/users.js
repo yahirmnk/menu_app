@@ -21,20 +21,19 @@ router.post("/register", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(contrasena, 10);
-    // Crear usuario nuevo
     const newUser = new User({ nombre, correo, contrasena: hashedPassword });
     await newUser.save();
 
     console.log("✅ Usuario registrado correctamente:", newUser);
 
-    // Evitar enviar la contraseña en la respuesta
     const userResponse = newUser.toObject();
     delete userResponse.contrasena;
-
-    // 🔹 Convertir _id a string
     userResponse._id = newUser._id.toString();
 
-    res.status(201).json({ message: "Usuario registrado", user: userResponse });
+    res.status(201).json({
+      message: "Usuario registrado correctamente",
+      user: userResponse
+    });
 
   } catch (error) {
     console.error("💥 Error en registro:", error);
@@ -67,14 +66,15 @@ router.post("/login", async (req, res) => {
 
     console.log("✅ Login exitoso:", correo);
 
-    // Evitar enviar la contraseña
     const userResponse = user.toObject();
     delete userResponse.contrasena;
-
-    //  Convertir _id a string
     userResponse._id = user._id.toString();
 
-    res.json(userResponse);
+    res.json({
+      message: "Login exitoso",
+      user: userResponse
+    });
+
   } catch (error) {
     console.error("💥 Error en login:", error);
     res.status(500).json({ message: "Error interno", error: error.message });
@@ -82,4 +82,3 @@ router.post("/login", async (req, res) => {
 });
 
 module.exports = router;
-
