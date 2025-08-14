@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:menu_fit/screens/register_screnn.dart';
+import 'package:menu_fit/screens/register_screen.dart'; // <- corregido
 import '../services/mongo_service.dart';
 import 'home_screen.dart';
-
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,28 +18,35 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
 
   void _login() async {
-  setState(() {
-    _loading = true;
-    _error = null;
-  });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
 
-  final user = await _mongoService.login(
-    _correoController.text.trim(),
-    _passwordController.text.trim(),
-  );
-
-  setState(() => _loading = false);
-
-  if (user != null) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+    final user = await _mongoService.login(
+      _correoController.text.trim().toLowerCase(), // ⭐ normaliza
+      _passwordController.text.trim(),
     );
-  } else {
-    setState(() => _error = "Correo o contraseña inválidos"); // o usa un SnackBar
-  }
-}
 
+    setState(() => _loading = false);
+
+    if (user != null) {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen(user: user)),
+      );
+    } else {
+      setState(() => _error = "Correo o contraseña inválidos");
+    }
+  }
+
+  @override
+  void dispose() {
+    _correoController.dispose(); // ⭐
+    _passwordController.dispose(); // ⭐
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,15 +58,19 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: _correoController,
+              keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(labelText: "Correo"),
+              onSubmitted: (_) => _loading ? null : _login(), // opcional
             ),
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: "Contraseña"),
               obscureText: true,
+              onSubmitted: (_) => _loading ? null : _login(), // opcional
             ),
             const SizedBox(height: 20),
-            if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
+            if (_error != null)
+              Text(_error!, style: const TextStyle(color: Colors.red)),
             ElevatedButton(
               onPressed: _loading ? null : _login,
               child: _loading

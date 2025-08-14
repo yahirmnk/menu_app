@@ -14,12 +14,23 @@ class MongoService {
   Future<Map<String, dynamic>?> _post(String endpoint, Map<String, dynamic> body) async {
     try {
       final url = Uri.parse("$baseUrl/$endpoint");
-      final res = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      );
-      // 200/201 -> OK
+      // ⭐ log útil para depurar rutas
+      // ignore: avoid_print
+      print("➡️ POST $url body=$body");
+
+      final res = await http
+          .post(
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(body),
+          )
+          // ⭐ timeout para evitar cuelgues si Render tarda en “despertar”
+          .timeout(const Duration(seconds: 20));
+
+      // ⭐ log de respuesta
+      // ignore: avoid_print
+      print("⬅️ (${res.statusCode}) ${res.body}");
+
       if (res.statusCode == 200 || res.statusCode == 201) {
         return jsonDecode(res.body) as Map<String, dynamic>;
       }
@@ -34,14 +45,23 @@ class MongoService {
         throw Exception('Error ${res.statusCode}: ${res.body}');
       }
     } catch (e) {
-      rethrow;
+      // ignore: avoid_print
+      print("❌ POST $endpoint error: $e");
+      return null; // ⭐ devolvemos null para que la UI lo maneje
     }
   }
 
   Future<dynamic> _get(String endpoint) async {
     try {
       final url = Uri.parse("$baseUrl/$endpoint");
-      final res = await http.get(url);
+      // ignore: avoid_print
+      print("➡️ GET  $url");
+
+      final res = await http.get(url).timeout(const Duration(seconds: 20));
+
+      // ignore: avoid_print
+      print("⬅️ (${res.statusCode}) ${res.body}");
+
       if (res.statusCode == 200) {
         return jsonDecode(res.body);
       }
@@ -55,84 +75,65 @@ class MongoService {
         throw Exception('Error ${res.statusCode}: ${res.body}');
       }
     } catch (e) {
-      rethrow;
+      // ignore: avoid_print
+      print("❌ GET $endpoint error: $e");
+      return null; // ⭐ devolvemos null para que la UI lo maneje
     }
   }
 
   // -------- auth --------
-  /// Login: espera del backend { message, user: { ... } }
+  /// Login: backend unificado { message, user: { ... } } (pero tolera usuario plano)
   Future<User?> login(String correo, String password) async {
-    try {
-      final data = await _post("users/login", {
-        "correo": correo,
-        "contrasena": password,
-      });
+    // ⭐ normalizamos correo para evitar fallos por mayúsculas/espacios
+    final correoLimpio = correo.trim().toLowerCase();
 
-      if (data == null) return null;
+    final data = await _post("users/login", {
+      "correo": correoLimpio,
+      "contrasena": password,
+    });
 
-      // preferimos el formato unificado { message, user }
-      if (data.containsKey('user') && data['user'] is Map<String, dynamic>) {
-        return User.fromJson(data); // tu User.fromJson ya soporta "user"
-      }
+    if (data == null) return null;
 
-      // fallback por si el backend alguna vez devuelve el usuario plano
+    // { message, user: {...} }
+    if (data.containsKey('user') && data['user'] is Map<String, dynamic>) {
       return User.fromJson(data);
-    } catch (e) {
-      // Log opcional
-      // ignore: avoid_print
-      print("❌ Error en login: $e");
-      return null;
     }
+    // fallback (usuario plano)
+    return User.fromJson(data);
   }
 
-  /// Registro: espera del backend { message, user: { ... } }
+  /// Registro: backend unificado { message, user: { ... } } (pero tolera usuario plano)
   Future<User?> register(String nombre, String correo, String password) async {
-    try {
-      final data = await _post("users/register", {
-        "nombre": nombre,
-        "correo": correo,
-        "contrasena": password,
-      });
+    final correoLimpio = correo.trim().toLowerCase(); // ⭐ normalizamos
 
-      if (data == null) return null;
+    final data = await _post("users/register", {
+      "nombre": nombre.trim(),
+      "correo": correoLimpio,
+      "contrasena": password,
+    });
 
-      if (data.containsKey('user') && data['user'] is Map<String, dynamic>) {
-        return User.fromJson(data);
-      }
+    if (data == null) return null;
+
+    if (data.containsKey('user') && data['user'] is Map<String, dynamic>) {
       return User.fromJson(data);
-    } catch (e) {
-      // ignore: avoid_print
-      print("❌ Error en registro: $e");
-      return null;
     }
+    return User.fromJson(data);
   }
 
-  // -------- dietas y recetas (si ya las usas) --------
+  // -------- dietas y recetas --------
   Future<List<Diet>> getDiets() async {
-    try {
-      final data = await _get("diets");
-      if (data is List) {
-        return data.map((e) => Diet.fromJson(e as Map<String, dynamic>)).toList();
-      }
-      return [];
-    } catch (e) {
-      // ignore: avoid_print
-      print("❌ Error getDiets: $e");
-      return [];
+    final data = await _get("diets");
+    if (data is List) {
+      return data.map((e) => Diet.fromJson(e as Map<String, dynamic>)).toList();
     }
+    return [];
   }
 
   Future<List<Recipe>> getRecipesByDiet(String dietTag) async {
-    try {
-      final data = await _get("recipes?dietTag=$dietTag");
-      if (data is List) {
-        return data.map((e) => Recipe.fromJson(e as Map<String, dynamic>)).toList();
-      }
-      return [];
-    } catch (e) {
-      // ignore: avoid_print
-      print("❌ Error getRecipesByDiet: $e");
-      return [];
+    final data = await _get("recipes?dietTag=$dietTag");
+    if (data is List) {
+      return data.map((e) => Recipe.fromJson(e as Map<String, dynamic>)).toList();
     }
+    return [];
   }
 }
