@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:menu_fit/screens/create_recipe_screen.dart';
 import '../models/user.dart';
 import 'recipes_screen.dart';
 
@@ -12,6 +13,15 @@ class HomeScreen extends StatelessWidget {
       {"title": "Masa Muscular", "tag": "masa_muscular"},
       {"title": "Déficit Calórico", "tag": "deficit_calorico"},
     ];
+    ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CreateRecipeScreen()),
+        );
+      },
+      child: const Text("Publicar receta"),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text("Bienvenido, ${user.nombre}")),
@@ -37,4 +47,5 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+  
 }
