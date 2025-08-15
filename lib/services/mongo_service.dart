@@ -84,7 +84,7 @@ class MongoService {
   // -------- auth --------
   /// Login: backend unificado { message, user: { ... } } (pero tolera usuario plano)
   Future<User?> login(String correo, String password) async {
-    // ⭐ normalizamos correo para evitar fallos por mayúsculas/espacios
+    // normalizamos correo para evitar fallos por mayúsculas/espacios
     final correoLimpio = correo.trim().toLowerCase();
 
     final data = await _post("users/login", {
@@ -136,4 +136,43 @@ class MongoService {
     }
     return [];
   }
+  // -------- crear receta --------
+  Future<Recipe?> createRecipe({
+    required String titulo,
+    required String dietTag,
+    required List<Map<String, String>> ingredientes,
+    required List<String> modoPreparacion,
+    required int calorias,
+    required int proteinas,
+    required int grasas,
+    required String tiempoPreparacion,
+    required int costoPromedio,
+    String? autorId, // opcional por ahora
+  }) async {
+    try {
+      final body = {
+        "titulo": titulo,
+        "dietTag": dietTag,
+        "ingredientes": ingredientes,
+        "modoPreparacion": modoPreparacion,
+        "calorias": calorias,
+        "proteinas": proteinas,
+        "grasas": grasas,
+        "tiempoPreparacion": tiempoPreparacion,
+        "costoPromedio": costoPromedio,
+        if (autorId != null) "autorId": autorId,
+      };
+
+      final data = await _post("recipes", body);
+
+      if (data == null) return null;
+
+      return Recipe.fromJson(data);
+    } catch (e) {
+    // ignore: avoid_print
+      print("❌ Error en createRecipe: $e");
+      return null;
+    }
+  }
+
 }

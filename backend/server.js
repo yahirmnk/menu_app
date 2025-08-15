@@ -7,7 +7,7 @@ const cors = require("cors");
 const recipeRoutes = require("./routes/recipes");
 const userRoutes = require("./routes/users");
 const dietRoutes = require("./routes/diets"); 
-
+const adminRecipeRoutes = require("./routes/admin_recipes");
 
 const app = express();
 
@@ -19,7 +19,8 @@ app.get("/", (req, res) => res.json({ ok: true, env: process.env.NODE_ENV || "de
 // Rutas
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/diets", dietRoutes); 
+app.use("/api/diets", dietRoutes);
+app.use("/api/admin/recipes", adminRecipeRoutes); 
 
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGODB_URI)
