@@ -38,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       setState(() => _error = "Correo o contraseña inválidos");
+      setState(() => _error = "O problemas con el servidor vuelva a oprimir iniciar sesión");
     }
   }
 
