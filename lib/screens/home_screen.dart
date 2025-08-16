@@ -16,45 +16,50 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text("Bienvenido, ${user.nombre}")),
-      body: Padding(
-        padding: const EdgeInsets.only(bottom: 80), // para que no tape el FAB
-        child: GridView.builder(
-          padding: const EdgeInsets.all(20),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10,
+      body: Stack(
+        children: [
+          // tu grid
+          GridView.builder(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // deja espacio al botón
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10,
+            ),
+            itemCount: diets.length,
+            itemBuilder: (context, index) {
+              final diet = diets[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => RecipesScreen(dietTag: diet["tag"]!)),
+                  );
+                },
+                child: Card(
+                  child: Center(
+                    child: Text(diet["title"]!, style: const TextStyle(fontSize: 18)),
+                  ),
+                ),
+              );
+            },
           ),
-          itemCount: diets.length,
-          itemBuilder: (context, index) {
-            final diet = diets[index];
-            return GestureDetector(
-              onTap: () {
+          //   botón fijo esquina inferior derecha
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: FloatingActionButton.extended(
+              onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => RecipesScreen(dietTag: diet["tag"]!),
-                  ),
+                  MaterialPageRoute(builder: (_) => const CreateRecipeScreen()),
                 );
               },
-              child: Card(
-                child: Center(
-                  child: Text(diet["title"]!, style: const TextStyle(fontSize: 18)),
-                ),
-              ),
-            );
-          },
-        ),
+              icon: const Icon(Icons.add),
+              label: const Text("Publicar receta"),
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateRecipeScreen()),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Publicar receta"),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+
   }
 }
