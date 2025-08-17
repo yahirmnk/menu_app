@@ -38,7 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       setState(() => _error = "Correo o contraseña inválidos");
-      setState(() => _error = "O problemas con el servidor vuelva a oprimir iniciar sesión");
     }
   }
 
@@ -79,9 +78,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   : const Text("Ingresar"),
             ),
             const SizedBox(height: 12),
+            const Text(
+              "Si sus datos son correctos y no logra iniciar sesión vuelva a oprimir nuevamente en Ingresar",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const Text("Si sus datos son correctos y no logro iniciar sesión vuelva a oprimir en Ingresar"),
                 const Text("¿No tienes cuenta? "),
                 TextButton(
                   onPressed: () {
