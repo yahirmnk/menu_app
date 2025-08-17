@@ -1,37 +1,104 @@
+class Ingredient {
+  final String nombre;
+  final String cantidad;
+
+  Ingredient({
+    required this.nombre,
+    required this.cantidad,
+  });
+
+  factory Ingredient.fromJson(Map<String, dynamic> json) => Ingredient(
+        nombre: (json['nombre'] ?? '').toString(),
+        cantidad: (json['cantidad'] ?? '').toString(),
+      );
+}
+
 class Recipe {
   final String id;
-  final String title;
-  final String dietTag;
-  final String prepTime; // Cambié a String porque en Mongo es "25 min"
-  final double calories;
-  final double protein;
-  final double fat;
-  final double avgCost;
-  final double ratingAverage;
+
+  // Nombres “UI-friendly” pero mapeados a campos del backend
+  final String title;              // backend: titulo
+  final String dietTag;            // backend: dietTag
+  final String prepTime;           // backend: tiempoPreparacion (string tipo "25 min")
+
+  // Listas desde backend
+  final List<Ingredient> ingredientes;     // backend: ingredientes [{nombre,cantidad}]
+  final List<String> modoPreparacion;      // backend: modoPreparacion [String]
+
+  // Nutrientes y costos
+  final int calories;              // backend: calorias (int)
+  final int protein;               // backend: proteinas (int)
+  final int fat;                   // backend: grasas (int)
+  final int avgCost;               // backend: costoPromedio (int)
+
+  // Rating
+  final double ratingAverage;      // backend: calificacionPromedio (num)
+
+  // Opcionales
+  final String? status;            // pending/approved/rejected
+  final String? autorId;
 
   Recipe({
     required this.id,
     required this.title,
     required this.dietTag,
     required this.prepTime,
+    required this.ingredientes,
+    required this.modoPreparacion,
     required this.calories,
     required this.protein,
     required this.fat,
     required this.avgCost,
     required this.ratingAverage,
+    this.status,
+    this.autorId,
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
+    // A veces llega envuelto como { recipe: {...} }
+    final map = (json['recipe'] is Map) ? (json['recipe'] as Map<String, dynamic>) : json;
+
+    // _id puede venir como ObjectId o string
+    final rawId = map['_id'];
+    final id = rawId is Map ? (rawId['\$oid']?.toString() ?? rawId.toString()) : rawId?.toString() ?? '';
+
+    // Utilidades para parseo seguro a int/double
+    int _asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return int.tryParse('$v') ?? 0;
+    }
+
+    double _asDouble(dynamic v) {
+      if (v is double) return v;
+      if (v is num) return v.toDouble();
+      return double.tryParse('$v') ?? 0.0;
+    }
+
     return Recipe(
-      id: json["_id"] is Map ? json["_id"]: json["_id"].toString(),
-      title: json["titulo"],
-      dietTag: json["dietTag"],
-      prepTime: json["tiempoPreparacion"] ?? "",
-      calories: (json["calorias"] ?? 0).toDouble(),
-      protein: (json["proteinas"] ?? 0).toDouble(),
-      fat: (json["grasas"] ?? 0).toDouble(),
-      avgCost: (json["costoPromedio"] ?? 0).toDouble(),
-      ratingAverage: (json["calificacionPromedio"] ?? 0).toDouble(),
+      id: id,
+      title: (map['titulo'] ?? '').toString(),
+      dietTag: (map['dietTag'] ?? '').toString(),
+      prepTime: (map['tiempoPreparacion'] ?? '').toString(),
+
+      ingredientes: (map['ingredientes'] as List? ?? [])
+          .whereType<Map>() // por seguridad
+          .map((e) => Ingredient.fromJson(e.cast<String, dynamic>()))
+          .toList(),
+
+      modoPreparacion: (map['modoPreparacion'] as List? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+
+      calories: _asInt(map['calorias']),
+      protein: _asInt(map['proteinas']),
+      fat: _asInt(map['grasas']),
+      avgCost: _asInt(map['costoPromedio']),
+
+      ratingAverage: _asDouble(map['calificacionPromedio']),
+
+      status: map['status']?.toString(),
+      autorId: map['autorId']?.toString(),
     );
   }
 }
