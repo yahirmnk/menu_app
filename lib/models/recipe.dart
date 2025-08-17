@@ -31,9 +31,6 @@ class Recipe {
   final int fat;            // backend: grasas
   final int avgCost;        // backend: costoPromedio
 
-  // Compatibilidad con rating anterior (puedes dejar de usarlo en UI)
-  final double ratingAverage; // backend: calificacionPromedio
-
   // Estado/autor
   final String? status;     // pending/approved/rejected
   final String? autorId;
@@ -53,7 +50,6 @@ class Recipe {
     required this.protein,
     required this.fat,
     required this.avgCost,
-    required this.ratingAverage,
     this.status,
     this.autorId,
     this.likesCount = 0,
@@ -65,12 +61,6 @@ class Recipe {
     if (v is int) return v;
     if (v is num) return v.toInt();
     return int.tryParse('$v') ?? 0;
-  }
-
-  static double _asDouble(dynamic v) {
-    if (v is double) return v;
-    if (v is num) return v.toDouble();
-    return double.tryParse('$v') ?? 0.0;
   }
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -104,8 +94,6 @@ class Recipe {
       fat: _asInt(map['grasas']),
       avgCost: _asInt(map['costoPromedio']),
 
-      ratingAverage: _asDouble(map['calificacionPromedio']),
-
       status: map['status']?.toString(),
       autorId: map['autorId']?.toString(),
 
@@ -116,4 +104,39 @@ class Recipe {
 
   // Utilidad para UI (saber si un usuario ya dio "me encanta")
   bool likedBy(String userId) => likes.contains(userId);
+
+  // 🔹 Nuevo: copyWith para actualizar solo algunos campos sin perder el resto
+  Recipe copyWith({
+    String? id,
+    String? title,
+    String? dietTag,
+    String? prepTime,
+    List<Ingredient>? ingredientes,
+    List<String>? modoPreparacion,
+    int? calories,
+    int? protein,
+    int? fat,
+    int? avgCost,
+    String? status,
+    String? autorId,
+    int? likesCount,
+    List<String>? likes,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      dietTag: dietTag ?? this.dietTag,
+      prepTime: prepTime ?? this.prepTime,
+      ingredientes: ingredientes ?? this.ingredientes,
+      modoPreparacion: modoPreparacion ?? this.modoPreparacion,
+      calories: calories ?? this.calories,
+      protein: protein ?? this.protein,
+      fat: fat ?? this.fat,
+      avgCost: avgCost ?? this.avgCost,
+      status: status ?? this.status,
+      autorId: autorId ?? this.autorId,
+      likesCount: likesCount ?? this.likesCount,
+      likes: likes ?? this.likes,
+    );
+  }
 }

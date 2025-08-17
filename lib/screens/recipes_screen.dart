@@ -5,7 +5,7 @@ import 'recipe_detail_screen.dart';
 
 class RecipesScreen extends StatefulWidget {
   final String dietTag;
-  final String? userId; // <- añade esto (pásalo desde HomeScreen)
+  final String? userId; // pásalo desde HomeScreen: user.id
 
   const RecipesScreen({
     super.key,
@@ -45,57 +45,43 @@ class _RecipesScreenState extends State<RecipesScreen> {
       return;
     }
 
-    // Optimista: actualiza UI al instante
-    final alreadyLiked = r.likes.contains(userId);
+    final alreadyLiked = r.likedBy(userId);
+
+    // Actualización optimista
+    final updatedLikes = List<String>.from(r.likes);
+    int updatedCount = r.likesCount;
+    if (alreadyLiked) {
+      if (updatedCount > 0) updatedCount--;
+      updatedLikes.remove(userId);
+    } else {
+      updatedCount++;
+      updatedLikes.add(userId);
+    }
+
+    final original = r;
     setState(() {
-      final updatedLikes = List<String>.from(r.likes);
-      int updatedCount = r.likesCount;
-      if (alreadyLiked) {
-        updatedLikes.remove(userId);
-        updatedCount = (updatedCount - 1).clamp(0, 1 << 31);
-      } else {
-        updatedLikes.add(userId);
-        updatedCount = updatedCount + 1;
-      }
-      _recipes[index] = Recipe(
-        id: r.id,
-        title: r.title,
-        dietTag: r.dietTag,
-        prepTime: r.prepTime,
-        ingredientes: r.ingredientes,
-        modoPreparacion: r.modoPreparacion,
-        calories: r.calories,
-        protein: r.protein,
-        fat: r.fat,
-        avgCost: r.avgCost,
-        likesCount: updatedCount,
+      _recipes[index] = r.copyWith(
         likes: updatedLikes,
-        status: r.status,
-        autorId: r.autorId,
+        likesCount: updatedCount,
       );
     });
 
-    // Llama API real
-    Recipe? server;
-    if (alreadyLiked) {
-      server = await _mongoService.unlikeRecipe(recipeId: r.id, userId: userId);
-    } else {
-      server = await _mongoService.likeRecipe(recipeId: r.id, userId: userId);
-    }
+    // Llamada real
+    final server = alreadyLiked
+        ? await _mongoService.unlikeRecipe(recipeId: r.id, userId: userId)
+        : await _mongoService.likeRecipe(recipeId: r.id, userId: userId);
 
-    // Si fallo, revierte
-    if (server == null && mounted) {
-      setState(() {
-        _recipes[index] = r; // revertir al original
-      });
+    if (!mounted) return;
+
+    if (server == null) {
+      // Revertir si falló
+      setState(() => _recipes[index] = original);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No se pudo actualizar el me encanta.")),
       );
-    } else if (server != null && mounted) {
-      // opcional: sincronizar con lo que diga el servidor
-      setState(() {
-        _recipes[index] = server!;
-      });
+    } else {
+      // Sincronizar con server
+      setState(() => _recipes[index] = server);
     }
   }
 
@@ -110,7 +96,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final r = _recipes[index];
-                final liked = widget.userId != null && r.likes.contains(widget.userId);
+                final liked = widget.userId != null && r.likedBy(widget.userId!);
 
                 return ListTile(
                   title: Text(r.title),
@@ -121,20 +107,25 @@ class _RecipesScreenState extends State<RecipesScreen> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("${r.likesCount}"),
-                      const SizedBox(width: 6),
                       IconButton(
                         icon: Icon(liked ? Icons.favorite : Icons.favorite_border),
                         color: liked ? Colors.red : null,
-                        onPressed: () => _toggleLike(r, index),
                         tooltip: liked ? "Ya no me encanta" : "Me encanta",
+                        onPressed: () => _toggleLike(r, index),
                       ),
+                      const SizedBox(width: 4),
+                      Text("${r.likesCount}"),
                     ],
                   ),
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: r)),
+                      MaterialPageRoute(
+                        builder: (_) => RecipeDetailScreen(
+                          recipe: r,
+                          userId: widget.userId, // pasa el userId al detalle
+                        ),
+                      ),
                     );
                   },
                 );
