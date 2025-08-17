@@ -16,28 +16,31 @@ class Ingredient {
 class Recipe {
   final String id;
 
-  // Nombres “UI-friendly” pero mapeados a campos del backend
-  final String title;              // backend: titulo
-  final String dietTag;            // backend: dietTag
-  final String prepTime;           // backend: tiempoPreparacion (string tipo "25 min")
+  // Campos principales (mapeados desde backend)
+  final String title;       // backend: titulo
+  final String dietTag;     // backend: dietTag
+  final String prepTime;    // backend: tiempoPreparacion
 
   // Listas desde backend
-  final List<Ingredient> ingredientes;     // backend: ingredientes [{nombre,cantidad}]
-  final List<String> modoPreparacion;      // backend: modoPreparacion [String]
+  final List<Ingredient> ingredientes; // backend: ingredientes [{nombre,cantidad}]
+  final List<String> modoPreparacion;  // backend: modoPreparacion [String]
 
   // Nutrientes y costos
-  final int calories;              // backend: calorias (int)
-  final int protein;               // backend: proteinas (int)
-  final int fat;                   // backend: grasas (int)
-  final int avgCost;               // backend: costoPromedio (int)
+  final int calories;       // backend: calorias
+  final int protein;        // backend: proteinas
+  final int fat;            // backend: grasas
+  final int avgCost;        // backend: costoPromedio
 
-  // Rating
-  final int likesCount;
-  final List<String> likes;      // backend cantidad de likes
+  // Compatibilidad con rating anterior (puedes dejar de usarlo en UI)
+  final double ratingAverage; // backend: calificacionPromedio
 
-  // Opcionales
-  final String? status;            // pending/approved/rejected
+  // Estado/autor
+  final String? status;     // pending/approved/rejected
   final String? autorId;
+
+  // ❤️ Likes
+  final int likesCount;     // backend: likesCount
+  final List<String> likes; // backend: likes (userId list)
 
   Recipe({
     required this.id,
@@ -50,32 +53,36 @@ class Recipe {
     required this.protein,
     required this.fat,
     required this.avgCost,
-    required this.likesCount,
-    required this.likes,
+    required this.ratingAverage,
     this.status,
     this.autorId,
+    this.likesCount = 0,
+    this.likes = const [],
   });
 
+  // Helpers de parseo seguros (evita errores con num/string)
+  static int _asInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse('$v') ?? 0;
+  }
+
+  static double _asDouble(dynamic v) {
+    if (v is double) return v;
+    if (v is num) return v.toDouble();
+    return double.tryParse('$v') ?? 0.0;
+  }
+
   factory Recipe.fromJson(Map<String, dynamic> json) {
-    // A veces llega envuelto como { recipe: {...} }
-    final map = (json['recipe'] is Map) ? (json['recipe'] as Map<String, dynamic>) : json;
+    final map = (json['recipe'] is Map)
+        ? (json['recipe'] as Map<String, dynamic>)
+        : json;
 
-    // _id puede venir como ObjectId o string
+    // _id puede venir como string o como {"$oid": "..."}
     final rawId = map['_id'];
-    final id = rawId is Map ? (rawId['\$oid']?.toString() ?? rawId.toString()) : rawId?.toString() ?? '';
-
-    // Utilidades para parseo seguro a int/double
-    int _asInt(dynamic v) {
-      if (v is int) return v;
-      if (v is num) return v.toInt();
-      return int.tryParse('$v') ?? 0;
-    }
-
-    double _asDouble(dynamic v) {
-      if (v is double) return v;
-      if (v is num) return v.toDouble();
-      return double.tryParse('$v') ?? 0.0;
-    }
+    final id = rawId is Map
+        ? (rawId['\$oid']?.toString() ?? rawId.toString())
+        : rawId?.toString() ?? '';
 
     return Recipe(
       id: id,
@@ -84,7 +91,7 @@ class Recipe {
       prepTime: (map['tiempoPreparacion'] ?? '').toString(),
 
       ingredientes: (map['ingredientes'] as List? ?? [])
-          .whereType<Map>() // por seguridad
+          .whereType<Map>()
           .map((e) => Ingredient.fromJson(e.cast<String, dynamic>()))
           .toList(),
 
@@ -97,13 +104,16 @@ class Recipe {
       fat: _asInt(map['grasas']),
       avgCost: _asInt(map['costoPromedio']),
 
-      likesCount: _asInt(map['likesCount']),
-      likes: (map['likes'] as List? ?? []).map((e) => e.toString()).toList(),
+      ratingAverage: _asDouble(map['calificacionPromedio']),
 
       status: map['status']?.toString(),
       autorId: map['autorId']?.toString(),
+
+      likesCount: _asInt(map['likesCount']),
+      likes: ((map['likes'] as List?) ?? []).map((e) => e.toString()).toList(),
     );
   }
-  //contador 
-  bool likedby(String userId) => likes.contains(userId);
+
+  // Utilidad para UI (saber si un usuario ya dio "me encanta")
+  bool likedBy(String userId) => likes.contains(userId);
 }
