@@ -19,6 +19,7 @@ class RecipeDetailScreen extends StatelessWidget {
             Text("Proteína: ${recipe.protein} g"),
             Text("Grasas: ${recipe.fat} g"),
             Text("Costo promedio: \$${recipe.avgCost}"),
+            Text("Modo de preparación: ${recipe.modoPreparacion}"),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {},

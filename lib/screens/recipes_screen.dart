@@ -42,8 +42,10 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 final r = _recipes[index];
                 return ListTile(
                   title: Text(r.title),
-                  subtitle: Text("${r.calories} kcal | ${r.protein}g proteína"),
-                  trailing: Text("⭐ ${r.ratingAverage  }"),
+                  subtitle: Text(
+                    "⏱ ${r.prepTime} • Cal: ${r.calories} • Prot: ${r.protein}g • Gras: ${r.fat}g\n"
+                    "💲 ${r.avgCost} • ⭐ ${r.ratingAverage.toStringAsFixed(1)}",
+                  ),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(
                       builder: (_) => RecipeDetailScreen(recipe: r),
