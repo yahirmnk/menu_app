@@ -58,15 +58,30 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: _correoController,
+              decoration: const InputDecoration(
+                labelText: "Correo electrónico",
+                floatingLabelBehavior: FloatingLabelBehavior.always, 
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              ),
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: "Correo"),
-              onSubmitted: (_) => _loading ? null : _login(), // opcional
             ),
+
+            const SizedBox(height: 16), // <- separación entre campos
+
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: "Contraseña"),
               obscureText: true,
-              onSubmitted: (_) => _loading ? null : _login(), // opcional
+              decoration: const InputDecoration(
+                labelText: "Contraseña",
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              ),
             ),
             const SizedBox(height: 20),
             if (_error != null)
