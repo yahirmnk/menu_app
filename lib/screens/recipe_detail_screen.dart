@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../services/mongo_service.dart';
 import '../ui/app_colors.dart';
+import '../ui/anim.dart'; // <-- para LikeSwitcher
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -97,19 +98,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           decoration: const BoxDecoration(gradient: AppColors.brandGradient),
         ),
         actions: [
-          Row(
-            children: [
-              IconButton(
-                tooltip: liked ? "Ya no me encanta" : "Me encanta",
-                icon: Icon(liked ? Icons.favorite : Icons.favorite_border),
-                color: liked ? AppColors.limeMint : null,
-                onPressed: _liking ? null : _toggleLike,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Text("${_recipe.likesCount}"),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: LikeSwitcher(
+              liked: liked,
+              count: _recipe.likesCount,
+              activeColor: AppColors.limeMint,
+              onPressed: _liking ? () {} : _toggleLike,
+            ),
           ),
         ],
       ),
