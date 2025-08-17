@@ -32,7 +32,8 @@ class Recipe {
   final int avgCost;               // backend: costoPromedio (int)
 
   // Rating
-  final double ratingAverage;      // backend: calificacionPromedio (num)
+  final int likesCount;
+  final List<String> likes;      // backend cantidad de likes
 
   // Opcionales
   final String? status;            // pending/approved/rejected
@@ -49,7 +50,8 @@ class Recipe {
     required this.protein,
     required this.fat,
     required this.avgCost,
-    required this.ratingAverage,
+    required this.likesCount,
+    required this.likes,
     this.status,
     this.autorId,
   });
@@ -95,10 +97,13 @@ class Recipe {
       fat: _asInt(map['grasas']),
       avgCost: _asInt(map['costoPromedio']),
 
-      ratingAverage: _asDouble(map['calificacionPromedio']),
+      likesCount: _asInt(map['likesCount']),
+      likes: (map['likes'] as List? ?? []).map((e) => e.toString()).toList(),
 
       status: map['status']?.toString(),
       autorId: map['autorId']?.toString(),
     );
   }
+  //contador 
+  bool likedby(String userId) => likes.contains(userId);
 }

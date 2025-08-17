@@ -10,8 +10,9 @@ const recipeSchema = new mongoose.Schema({
   grasas: { type: Number, default: 0 },
   tiempoPreparacion: { type: String, default: "" },
   costoPromedio: { type: Number, default: 0 },
-  calificacionPromedio: { type: Number, default: 0 },
-  autorId: { type: String, default: null },
+  //calificacionPromedio: { type: Number, default: 0 },
+  likesCount: { type: Number, default: 0 },
+  likes: [{ type: String }],
 
   // 🔽 nuevo: flujo de aprobación
   status: {

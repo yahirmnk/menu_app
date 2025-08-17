@@ -18,9 +18,8 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(title: Text("Bienvenido, ${user.nombre}")),
       body: Stack(
         children: [
-          // tu grid
           GridView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // deja espacio al botón
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10,
             ),
@@ -31,7 +30,12 @@ class HomeScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => RecipesScreen(dietTag: diet["tag"]!)),
+                    MaterialPageRoute(
+                      builder: (_) => RecipesScreen(
+                        dietTag: diet["tag"]!,
+                        userId: user.id, // <-- aquí pasamos el userId
+                      ),
+                    ),
                   );
                 },
                 child: Card(
@@ -42,7 +46,6 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
-          //   botón fijo esquina inferior derecha
           Positioned(
             right: 16,
             bottom: 16,
@@ -60,6 +63,5 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
-
   }
 }

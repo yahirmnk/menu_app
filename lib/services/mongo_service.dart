@@ -174,5 +174,44 @@ class MongoService {
       return null;
     }
   }
+  Future<Recipe?> likeRecipe({required String recipeId, required String userId}) async {
+    try {
+      final url = Uri.parse("$baseUrl/recipes/$recipeId/like");
+      final res = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"userId": userId}),
+      );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body) as Map<String, dynamic>;
+        return Recipe.fromJson(data);
+      } else {
+        print("❌ likeRecipe error: ${res.statusCode} -> ${res.body}");
+      }
+    } catch (e) {
+      print("❌ likeRecipe exception: $e");
+    }
+    return null;
+  }
+
+  Future<Recipe?> unlikeRecipe({required String recipeId, required String userId}) async {
+    try {
+      final url = Uri.parse("$baseUrl/recipes/$recipeId/unlike");
+      final res = await http.post(
+        url,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"userId": userId}),
+        );
+        if (res.statusCode == 200) {
+          final data = jsonDecode(res.body) as Map<String, dynamic>;
+          return Recipe.fromJson(data);
+        } else {
+          print("❌ unlikeRecipe error: ${res.statusCode} -> ${res.body}");
+        }
+      } catch (e) {
+        print("❌ unlikeRecipe exception: $e");
+      }
+    return null;
+  }
 
 }
