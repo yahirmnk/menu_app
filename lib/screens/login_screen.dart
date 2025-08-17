@@ -87,7 +87,6 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Si sus datos son correctos y no logro iniciar sesión vuelva a oprimir en Ingresar"),
                 const Text("¿No tienes cuenta? "),
                 TextButton(
                   onPressed: () {
