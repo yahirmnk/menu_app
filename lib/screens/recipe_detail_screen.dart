@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../services/mongo_service.dart';
+import '../ui/app_colors.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final Recipe recipe;
@@ -54,13 +55,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
 
     setState(() {
-      _recipe = _recipe.copyWith(
-        likes: updatedLikes,
-        likesCount: updatedCount,
-      );
+      _recipe = _recipe.copyWith(likes: updatedLikes, likesCount: updatedCount);
     });
 
-    // Llamada real
+    // Backend
     final server = alreadyLiked
         ? await _api.unlikeRecipe(recipeId: original.id, userId: userId)
         : await _api.likeRecipe(recipeId: original.id, userId: userId);
@@ -68,7 +66,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     if (!mounted) return;
 
     if (server == null) {
-      // Revertir si falló
       setState(() {
         _recipe = original;
         _liking = false;
@@ -77,7 +74,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         const SnackBar(content: Text("No se pudo actualizar el me encanta.")),
       );
     } else {
-      // Sincronizar con server
       setState(() {
         _recipe = server;
         _liking = false;
@@ -97,13 +93,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_recipe.title),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+        ),
         actions: [
           Row(
             children: [
               IconButton(
                 tooltip: liked ? "Ya no me encanta" : "Me encanta",
                 icon: Icon(liked ? Icons.favorite : Icons.favorite_border),
-                color: liked ? Colors.red : null,
+                color: liked ? AppColors.limeMint : null,
                 onPressed: _liking ? null : _toggleLike,
               ),
               Padding(
@@ -156,6 +155,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading: CircleAvatar(
                     radius: 12,
+                    backgroundColor: AppColors.ice,
                     child: Text("${e.key + 1}", style: const TextStyle(fontSize: 12)),
                   ),
                   title: Text(e.value),
@@ -184,7 +184,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          gradient: const LinearGradient(
+            colors: [AppColors.ice, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: AppColors.outline),
         ),
         child: Column(
           children: [

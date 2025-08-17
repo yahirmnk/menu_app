@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/mongo_service.dart';
 import '../models/recipe.dart';
 import 'recipe_detail_screen.dart';
+import '../ui/app_colors.dart';
 
 class RecipesScreen extends StatefulWidget {
   final String dietTag;
@@ -47,7 +48,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
     final alreadyLiked = r.likedBy(userId);
 
-    // Actualización optimista
+    // Optimista
     final updatedLikes = List<String>.from(r.likes);
     int updatedCount = r.likesCount;
     if (alreadyLiked) {
@@ -60,13 +61,10 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
     final original = r;
     setState(() {
-      _recipes[index] = r.copyWith(
-        likes: updatedLikes,
-        likesCount: updatedCount,
-      );
+      _recipes[index] = r.copyWith(likes: updatedLikes, likesCount: updatedCount);
     });
 
-    // Llamada real
+    // Backend
     final server = alreadyLiked
         ? await _mongoService.unlikeRecipe(recipeId: r.id, userId: userId)
         : await _mongoService.likeRecipe(recipeId: r.id, userId: userId);
@@ -74,13 +72,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
     if (!mounted) return;
 
     if (server == null) {
-      // Revertir si falló
       setState(() => _recipes[index] = original);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No se pudo actualizar el me encanta.")),
       );
     } else {
-      // Sincronizar con server
       setState(() => _recipes[index] = server);
     }
   }
@@ -88,7 +84,12 @@ class _RecipesScreenState extends State<RecipesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Recetas")),
+      appBar: AppBar(
+        title: const Text("Recetas"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+        ),
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView.separated(
@@ -99,22 +100,37 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 final liked = widget.userId != null && r.likedBy(widget.userId!);
 
                 return ListTile(
+                  leading: CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppColors.ice,
+                    child: Text(
+                      r.title.isNotEmpty ? r.title[0].toUpperCase() : "R",
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
                   title: Text(r.title),
                   subtitle: Text(
                     "⏱ ${r.prepTime} • Cal: ${r.calories} • Prot: ${r.protein}g • Gras: ${r.fat}g\n"
                     "💲 ${r.avgCost}",
+                    style: const TextStyle(height: 1.4),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
                         icon: Icon(liked ? Icons.favorite : Icons.favorite_border),
-                        color: liked ? Colors.red : null,
+                        color: liked ? AppColors.limeMint : Colors.black54,
                         tooltip: liked ? "Ya no me encanta" : "Me encanta",
                         onPressed: () => _toggleLike(r, index),
                       ),
                       const SizedBox(width: 4),
-                      Text("${r.likesCount}"),
+                      Text(
+                        "${r.likesCount}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: liked ? AppColors.limeMint : Colors.black87,
+                        ),
+                      ),
                     ],
                   ),
                   onTap: () {
@@ -123,7 +139,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       MaterialPageRoute(
                         builder: (_) => RecipeDetailScreen(
                           recipe: r,
-                          userId: widget.userId, // pasa el userId al detalle
+                          userId: widget.userId,
                         ),
                       ),
                     );
