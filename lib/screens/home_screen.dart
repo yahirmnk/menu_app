@@ -48,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
                 child: Card(
-                  color: AppColors.surfaceAlt, // 🔹 Fondo suave monocromático
+                  color: const Color.fromARGB(255, 8, 222, 234), // 🔹 Fondo suave monocromático
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
