@@ -119,11 +119,30 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                Chip(label: Text("Dieta: ${_recipe.dietTag}")),
-                Chip(label: Text("⏱ ${_recipe.prepTime}")),
-                Chip(label: Text("💲 ${_recipe.avgCost}")),
+                Chip(
+                  label: Text(
+                    "Dieta: ${_recipe.dietTag}",
+                    style: const TextStyle(color: Colors.black), // 🔹 fuerza negro
+                  ),
+                  backgroundColor: AppColors.surfaceAlt, // opcional, fondo suave
+                ),
+                Chip(
+                  label: Text(
+                    "⏱ ${_recipe.prepTime}",
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                  backgroundColor: AppColors.surfaceAlt,
+                ),
+                Chip(
+                  label: Text(
+                    "💲 ${_recipe.avgCost}",
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                  backgroundColor: AppColors.surfaceAlt,
+                ),
               ],
             ),
+
 
             _sectionTitle("Macronutrientes"),
             Row(
