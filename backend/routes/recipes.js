@@ -124,5 +124,17 @@ router.post("/:id/unlike", async (req, res, next) => {
     return res.json(rec);
   } catch (err) { next(err); }
 });
+  // GET /api/recipes/favorites/:userId  -> recetas aprobadas que contienen ese userId en "likes"
+router.get("/favorites/:userId", async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const recetas = await Recipe.find({
+      status: "approved",
+      likes: userId
+    }).sort({ createdAt: -1 });
+
+    return res.json(recetas);
+  } catch (err) { next(err); }
+});
 
 module.exports = router;

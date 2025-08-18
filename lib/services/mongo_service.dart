@@ -213,5 +213,14 @@ class MongoService {
       }
     return null;
   }
+  //FAVORITOS
+  Future<List<Recipe>> getFavoriteRecipes(String userId) async {
+    final data = await _get("recipes/favorites/$userId");
+    if (data is List) {
+      return data.map((e) => Recipe.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
 
 }
