@@ -141,61 +141,73 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   }
 
   Widget _buildIngredienteItem(int index) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextFormField(
-            initialValue: _ingredientes[index]["nombre"],
-            decoration: const InputDecoration(labelText: "Ingrediente"),
-            onChanged: (v) => _ingredientes[index]["nombre"] = v,
-            validator: (v) {
-              if ((v ?? "").trim().isEmpty) return "Requerido";
-              return null;
-            },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12), // ← margen entre filas
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: _ingredientes[index]["nombre"],
+              decoration: const InputDecoration(
+                labelText: "Ingrediente",
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 12), // ← padding interno
+              ),
+              onChanged: (v) => _ingredientes[index]["nombre"] = v,
+              validator: (v) => (v ?? "").trim().isEmpty ? "Requerido" : null,
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: TextFormField(
-            initialValue: _ingredientes[index]["cantidad"],
-            decoration: const InputDecoration(labelText: "Cantidad"),
-            onChanged: (v) => _ingredientes[index]["cantidad"] = v,
-            validator: (v) {
-              if ((v ?? "").trim().isEmpty) return "Requerido";
-              return null;
-            },
+          const SizedBox(width: 12), // ← más aire entre campos
+          Expanded(
+            child: TextFormField(
+              initialValue: _ingredientes[index]["cantidad"],
+              decoration: const InputDecoration(
+                labelText: "Cantidad",
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+              ),
+              onChanged: (v) => _ingredientes[index]["cantidad"] = v,
+              validator: (v) => (v ?? "").trim().isEmpty ? "Requerido" : null,
+            ),
           ),
-        ),
-        IconButton(
-          onPressed: () => _eliminarIngrediente(index),
-          icon: const Icon(Icons.remove_circle_outline),
-        )
-      ],
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: () => _eliminarIngrediente(index),
+            icon: const Icon(Icons.remove_circle_outline),
+            tooltip: "Eliminar",
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildPasoItem(int index) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextFormField(
-            initialValue: _pasos[index],
-            maxLines: 2,
-            decoration: InputDecoration(labelText: "Paso ${index + 1}"),
-            onChanged: (v) => _pasos[index] = v,
-            validator: (v) {
-              if ((v ?? "").trim().isEmpty) return "Requerido";
-              return null;
-            },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12), // ← margen entre filas
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: _pasos[index],
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: "Paso ${index + 1}",
+                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+              ),
+              onChanged: (v) => _pasos[index] = v,
+              validator: (v) => (v ?? "").trim().isEmpty ? "Requerido" : null,
+            ),
           ),
-        ),
-        IconButton(
-          onPressed: () => _eliminarPaso(index),
-          icon: const Icon(Icons.remove_circle_outline),
-        )
-      ],
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: () => _eliminarPaso(index),
+            icon: const Icon(Icons.remove_circle_outline),
+            tooltip: "Eliminar",
+          ),
+        ],
+      ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
