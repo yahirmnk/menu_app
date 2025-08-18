@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   // Paleta base (monocromática turquesa–azulada)
   static const Color cyanBright = Color(0xFF00DCE5);  // principal (botones, resaltes)
-  static const Color cyanMedium = Color(0xFF1FB6BB);  // secundarios, chips
+  static const Color cyanMedium = Color.fromARGB(255, 3, 86, 88);  // secundarios, chips
   static const Color cyanDark = Color(0xFF308D91);    // títulos, iconos destacados
   static const Color tealGray = Color(0xFF336466);    // barras, sombras suaves
   static const Color deepTeal = Color(0xFF283B3C);    // texto principal, fondos oscuros
