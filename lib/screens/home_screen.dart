@@ -48,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
       {"title": "Alta en proteínas",    "tag": "alta_proteina"},
       {"title": "Vegetariana/Vegana",   "tag": "vegetariana_vegana"},
       {"title": "Mediterránea",         "tag": "mediterranea"},
+      {"title": "Todas las dietas",      "tag": "all"}, 
     ];
 
     return Scaffold(

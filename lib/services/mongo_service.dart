@@ -130,12 +130,18 @@ class MongoService {
   }
 
   Future<List<Recipe>> getRecipesByDiet(String dietTag) async {
-    final data = await _get("recipes?dietTag=$dietTag");
+    // Si el tag es "all", no mandamos filtro por dietTag
+    final endpoint = (dietTag == 'all')
+        ? "recipes"                       // -> devuelve TODAS las aprobadas
+        : "recipes?dietTag=$dietTag";     // -> filtradas por dieta
+
+    final data = await _get(endpoint);
     if (data is List) {
       return data.map((e) => Recipe.fromJson(e as Map<String, dynamic>)).toList();
     }
     return [];
   }
+
   // -------- crear receta --------
   Future<Recipe?> createRecipe({
     required String titulo,
