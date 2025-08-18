@@ -71,7 +71,7 @@ class HomeScreen extends StatelessWidget {
           // Botón flotante
           Positioned(
             right: 16,
-            bottom: 16,
+            bottom: 32,
             child: FloatingActionButton.extended(
               backgroundColor: AppColors.secondary, // 🔹 acento monocromático
               onPressed: () {
