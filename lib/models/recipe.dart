@@ -67,6 +67,7 @@ class Recipe {
     return int.tryParse('$v') ?? 0;
   }
 
+  /// ---------- Helpers de parseo seguros ----------
   static double _asDouble(dynamic v) {
     if (v is double) return v;
     if (v is num) return v.toDouble();
