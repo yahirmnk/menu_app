@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  //  Paleta base
-  static const Color mint = Color(0xFF86EBCB);        // Verde menta suave (fresco, relajante)
-  static const Color sky = Color(0xFF86C9EB);         // Azul cielo pastel (principal, amigable)
-  static const Color aqua = Color(0xFF86E9EB);        // Azul–turquesa claro (acuático, refrescante)
-  static const Color limeMint = Color(0xFF86EBA7);    // Verde lima menta (brillante, energético)
-  static const Color cornflower = Color(0xFF86A9EB);  // Azul aciano (con un toque púrpura, armónico)
-  static const Color ice = Color(0xFFD3EAEB);         // Azul gris muy claro, casi blanco (fondos suaves)
+  // Paleta base (monocromática turquesa–azulada)
+  static const Color cyanBright = Color(0xFF00DCE5);  // principal (botones, resaltes)
+  static const Color cyanMedium = Color(0xFF1FB6BB);  // secundarios, chips
+  static const Color cyanDark = Color(0xFF308D91);    // títulos, iconos destacados
+  static const Color tealGray = Color(0xFF336466);    // barras, sombras suaves
+  static const Color deepTeal = Color(0xFF283B3C);    // texto principal, fondos oscuros
 
-  // Derivados semánticos (para UI)
-  static const Color primary = sky;        // Color principal (ej. AppBar, botones primarios)
-  static const Color onPrimary = Colors.white; // Texto/íconos encima de primary
-  static const Color secondary = mint;     // Acentos y chips secundarios
-  static const Color tertiary = cornflower;// Opción de tercer color (detalles y fondos alternos)
-  static const Color surface = Colors.white; // Fondos de pantallas y tarjetas
-  static const Color surfaceAlt = ice;     // Variante de superficie suave (contenedores alternativos)
-  static const Color outline = Color(0x1A000000); // Bordes muy sutiles (negro con baja opacidad)
+  // Semánticos (mapeados)
+  static const Color primary = cyanBright;
+  static const Color onPrimary = Colors.white;
+  static const Color secondary = cyanMedium;
+  static const Color tertiary = cyanDark;
+  static const Color surface = Colors.white;
+  static const Color surfaceAlt = Color(0xFFE5F9FA); // un derivado muy claro para fondos
+  static const Color outline = Color(0x1A000000); // bordes sutiles
 
-  //  Gradiente de marca (para headers, botones destacados, splash, etc.)
+  // Gradiente de marca (entre claros y medios)
   static const LinearGradient brandGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [sky, aqua, mint],
+    colors: [cyanBright, cyanMedium, cyanDark],
   );
 }
-

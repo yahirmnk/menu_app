@@ -3,11 +3,11 @@ import '../services/mongo_service.dart';
 import '../models/recipe.dart';
 import 'recipe_detail_screen.dart';
 import '../ui/app_colors.dart';
-import '../ui/anim.dart';
+import '../ui/anim.dart'; // <-- Asegura que lib/ui/anim.dart exista
 
 class RecipesScreen extends StatefulWidget {
   final String dietTag;
-  final String? userId;
+  final String? userId; // pásalo desde HomeScreen: user.id
 
   const RecipesScreen({
     super.key,
@@ -49,7 +49,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
     final alreadyLiked = r.likedBy(userId);
 
-    // Optimistic update
+    // Optimista
     final updatedLikes = List<String>.from(r.likes);
     int updatedCount = r.likesCount;
     if (alreadyLiked) {
@@ -65,7 +65,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
       _recipes[index] = r.copyWith(likes: updatedLikes, likesCount: updatedCount);
     });
 
-    // Backend update
+    // Backend
     final server = alreadyLiked
         ? await _mongoService.unlikeRecipe(recipeId: r.id, userId: userId)
         : await _mongoService.likeRecipe(recipeId: r.id, userId: userId);
@@ -100,44 +100,38 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 final r = _recipes[index];
                 final liked = widget.userId != null && r.likedBy(widget.userId!);
 
-                return FadeSlide(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 22,
-                      backgroundColor: AppColors.ice,
-                      child: Text(
-                        r.title.isNotEmpty ? r.title[0].toUpperCase() : "R",
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
+                return ListTile(
+                  leading: CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppColors.surfaceAlt,
+                    child: Text(
+                      r.title.isNotEmpty ? r.title[0].toUpperCase() : "R",
+                      style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
-                    title: Text(r.title),
-                    subtitle: Text(
-                      "⏱ ${r.prepTime} • Cal: ${r.calories} • Prot: ${r.protein}g • Gras: ${r.fat}g\n"
-                      "💲 ${r.avgCost}",
-                      style: const TextStyle(height: 1.4),
-                    ),
-                    trailing: LikeSwitcher(
-                      liked: liked,
-                      count: r.likesCount,
-                      activeColor: AppColors.limeMint,
-                      onPressed: () => _toggleLike(r, index),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          transitionDuration: const Duration(milliseconds: 260),
-                          pageBuilder: (_, a1, a2) => FadeTransition(
-                            opacity: a1,
-                            child: RecipeDetailScreen(
-                              recipe: r,
-                              userId: widget.userId,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
                   ),
+                  title: Text(r.title),
+                  subtitle: Text(
+                    "⏱ ${r.prepTime} • Cal: ${r.calories} • Prot: ${r.protein}g • Gras: ${r.fat}g\n"
+                    "💲 ${r.avgCost}",
+                    style: const TextStyle(height: 1.4),
+                  ),
+                  trailing: LikeSwitcher(
+                    liked: liked,
+                    count: r.likesCount,
+                    activeColor: AppColors.secondary,
+                    onPressed: () => _toggleLike(r, index),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RecipeDetailScreen(
+                          recipe: r,
+                          userId: widget.userId,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

@@ -3,7 +3,6 @@ import 'package:menu_fit/screens/create_recipe_screen.dart';
 import '../models/user.dart';
 import 'recipes_screen.dart';
 import '../ui/app_colors.dart';
-import '../ui/anim.dart';
 
 class HomeScreen extends StatelessWidget {
   final User user;
@@ -11,75 +10,84 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final diets = const [
+    final diets = [
       {"title": "Masa Muscular", "tag": "masa_muscular"},
       {"title": "Déficit Calórico", "tag": "deficit_calorico"},
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hola, ${user.nombre}"),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+        backgroundColor: AppColors.primary, // 🔹 nuevo tono monocromático
+        title: Text(
+          "Bienvenido, ${user.nombre}",
+          style: const TextStyle(color: Colors.white),
         ),
+        centerTitle: true,
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, mainAxisSpacing: 14, crossAxisSpacing: 14,
-          childAspectRatio: 1.05,
-        ),
-        itemCount: diets.length,
-        itemBuilder: (context, index) {
-          final diet = diets[index];
-          return FadeSlide(
-            child: PulseOnTap(
-              onTap: () {
+      body: Stack(
+        children: [
+          // Grid de opciones
+          GridView.builder(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12,
+            ),
+            itemCount: diets.length,
+            itemBuilder: (context, index) {
+              final diet = diets[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RecipesScreen(
+                        dietTag: diet["tag"]!,
+                        userId: user.id, // ✅ pásalo para likes
+                      ),
+                    ),
+                  );
+                },
+                child: Card(
+                  color: AppColors.surfaceAlt, // 🔹 Fondo suave monocromático
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: Text(
+                      diet["title"]!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // Botón flotante
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: FloatingActionButton.extended(
+              backgroundColor: AppColors.secondary, // 🔹 acento monocromático
+              onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => RecipesScreen(
-                      dietTag: diet["tag"]!,
-                      userId: user.id,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => const CreateRecipeScreen()),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.cornflower, AppColors.aqua],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    diet["title"]!,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                "Publicar receta",
+                style: TextStyle(color: Colors.white),
               ),
             ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add),
-        label: const Text("Publicar receta"),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateRecipeScreen()),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
