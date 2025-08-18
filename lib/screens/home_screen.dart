@@ -11,8 +11,13 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final diets = [
-      {"title": "Masa Muscular", "tag": "masa_muscular"},
-      {"title": "Déficit Calórico", "tag": "deficit_calorico"},
+      {"title": "Masa Muscular",        "tag": "masa_muscular"},
+      {"title": "Déficit Calórico",     "tag": "deficit_calorico"},
+      {"title": "Mantenimiento",        "tag": "mantenimiento"},
+      {"title": "Cetogénica (Keto)",    "tag": "cetogenica"},
+      {"title": "Alta en proteínas",    "tag": "alta_proteina"},
+      {"title": "Vegetariana/Vegana",   "tag": "vegetariana_vegana"},
+      {"title": "Mediterránea",         "tag": "mediterranea"},
     ];
 
     return Scaffold(
