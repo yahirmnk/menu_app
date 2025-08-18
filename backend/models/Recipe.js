@@ -13,6 +13,8 @@ const recipeSchema = new mongoose.Schema({
   //calificacionPromedio: { type: Number, default: 0 },
   likesCount: { type: Number, default: 0 },
   likes: [{ type: String }],
+  //imagenes
+  imageUrl: { type: String, default: null },
 
   // 🔽 nuevo: flujo de aprobación
   status: {

@@ -110,83 +110,110 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Chips de info rápida
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Chip(
-                  label: Text(
-                    "Dieta: ${_recipe.dietTag}",
-                    style: const TextStyle(color: Colors.black), // 🔹 fuerza negro
+            // Image section
+            if (_recipe.imageUrl != null && _recipe.imageUrl!.isNotEmpty)
+              AspectRatio(
+                aspectRatio: 16/9,
+                child: Image.network(
+                  _recipe.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.black12,
+                    child: const Center(child: Icon(Icons.image_not_supported, size: 48)),
                   ),
-                  backgroundColor: AppColors.surfaceAlt, // opcional, fondo suave
                 ),
-                Chip(
-                  label: Text(
-                    "⏱ ${_recipe.prepTime}",
-                    style: const TextStyle(color: Colors.black),
+              )
+            else
+              Container(
+                height: 180,
+                color: Colors.black12,
+                child: const Center(child: Icon(Icons.image, size: 48)),
+              ),
+
+            // Rest of the content
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Chips de info rápida
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      Chip(
+                        label: Text(
+                          "Dieta: ${_recipe.dietTag}",
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                        backgroundColor: AppColors.surfaceAlt,
+                      ),
+                      Chip(
+                        label: Text(
+                          "⏱ ${_recipe.prepTime}",
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                        backgroundColor: AppColors.surfaceAlt,
+                      ),
+                      Chip(
+                        label: Text(
+                          "💲 ${_recipe.avgCost}",
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                        backgroundColor: AppColors.surfaceAlt,
+                      ),
+                    ],
                   ),
-                  backgroundColor: AppColors.surfaceAlt,
-                ),
-                Chip(
-                  label: Text(
-                    "💲 ${_recipe.avgCost}",
-                    style: const TextStyle(color: Colors.black),
+
+                  _sectionTitle("Macronutrientes"),
+                  Row(
+                    children: [
+                      _macroBox("Calorías", "${_recipe.calories}"),
+                      const SizedBox(width: 12),
+                      _macroBox("Proteína", "${_recipe.protein} g"),
+                      const SizedBox(width: 12),
+                      _macroBox("Grasas", "${_recipe.fat} g"),
+                    ],
                   ),
-                  backgroundColor: AppColors.surfaceAlt,
-                ),
-              ],
-            ),
 
+                  _sectionTitle("Ingredientes"),
+                  ..._recipe.ingredientes.map((ing) => ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.check_circle_outline),
+                        title: Text(ing.nombre),
+                        trailing: Text(ing.cantidad),
+                      )),
 
-            _sectionTitle("Macronutrientes"),
-            Row(
-              children: [
-                _macroBox("Calorías", "${_recipe.calories}"),
-                const SizedBox(width: 12),
-                _macroBox("Proteína", "${_recipe.protein} g"),
-                const SizedBox(width: 12),
-                _macroBox("Grasas", "${_recipe.fat} g"),
-              ],
-            ),
+                  _sectionTitle("Modo de preparación"),
+                  ..._recipe.modoPreparacion.asMap().entries.map((e) => ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(
+                          radius: 12,
+                          backgroundColor: AppColors.surfaceAlt,
+                          child: Text("${e.key + 1}", style: const TextStyle(fontSize: 12)),
+                        ),
+                        title: Text(e.value),
+                      )),
 
-            _sectionTitle("Ingredientes"),
-            ..._recipe.ingredientes.map((ing) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.check_circle_outline),
-                  title: Text(ing.nombre),
-                  trailing: Text(ing.cantidad),
-                )),
-
-            _sectionTitle("Modo de preparación"),
-            ..._recipe.modoPreparacion.asMap().entries.map((e) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    radius: 12,
-                    backgroundColor: AppColors.surfaceAlt,
-                    child: Text("${e.key + 1}", style: const TextStyle(fontSize: 12)),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: _liking ? null : _toggleLike,
+                      icon: Icon(liked ? Icons.favorite : Icons.favorite_border),
+                      label: Text(liked ? "Quitar me encanta" : "Me encanta"),
+                    ),
                   ),
-                  title: Text(e.value),
-                )),
-
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: _liking ? null : _toggleLike,
-                icon: Icon(liked ? Icons.favorite : Icons.favorite_border),
-                label: Text(liked ? "Quitar me encanta" : "Me encanta"),
+                  const SizedBox(height: 8),
+                  Center(child: Text("Total de me encantan: ${_recipe.likesCount}")),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Center(child: Text("Total de me encantan: ${_recipe.likesCount}")),
-            const SizedBox(height: 24),
           ],
         ),
       ),

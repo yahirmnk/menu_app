@@ -137,4 +137,23 @@ router.get("/favorites/:userId", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// routes/recipes.js
+router.patch("/:id/image", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { imageUrl } = req.body;
+    if (!imageUrl) return res.status(400).json({ message: "imageUrl requerido" });
+
+    const updated = await Recipe.findByIdAndUpdate(
+      id,
+      { $set: { imageUrl } },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Receta no encontrada" });
+    res.json(updated);
+  } catch (err) { next(err); }
+});
+
+
 module.exports = router;

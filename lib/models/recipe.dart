@@ -17,27 +17,30 @@ class Recipe {
   final String id;
 
   // Campos principales (mapeados desde backend)
-  final String title;       // backend: titulo
-  final String dietTag;     // backend: dietTag
-  final String prepTime;    // backend: tiempoPreparacion
+  final String title;        // backend: titulo
+  final String dietTag;      // backend: dietTag
+  final String prepTime;     // backend: tiempoPreparacion
 
   // Listas desde backend
   final List<Ingredient> ingredientes; // backend: ingredientes [{nombre,cantidad}]
   final List<String> modoPreparacion;  // backend: modoPreparacion [String]
 
   // Nutrientes y costos
-  final int calories;       // backend: calorias
-  final int protein;        // backend: proteinas
-  final int fat;            // backend: grasas
-  final int avgCost;        // backend: costoPromedio
+  final int calories;        // backend: calorias
+  final int protein;         // backend: proteinas
+  final int fat;             // backend: grasas
+  final int avgCost;         // backend: costoPromedio
 
   // Estado/autor
-  final String? status;     // pending/approved/rejected
+  final String? status;      // pending/approved/rejected
   final String? autorId;
 
   // ❤️ Likes
-  final int likesCount;     // backend: likesCount
-  final List<String> likes; // backend: likes (userId list)
+  final int likesCount;      // backend: likesCount
+  final List<String> likes;  // backend: likes (userId list)
+
+  // 🖼️ Imagen
+  final String? imageUrl;    // backend: imageUrl
 
   Recipe({
     required this.id,
@@ -54,15 +57,23 @@ class Recipe {
     this.autorId,
     this.likesCount = 0,
     this.likes = const [],
+    this.imageUrl,
   });
 
-  // Helpers de parseo seguros (evita errores con num/string)
+  /// ---------- Helpers de parseo seguros ----------
   static int _asInt(dynamic v) {
     if (v is int) return v;
     if (v is num) return v.toInt();
     return int.tryParse('$v') ?? 0;
   }
 
+  static double _asDouble(dynamic v) {
+    if (v is double) return v;
+    if (v is num) return v.toDouble();
+    return double.tryParse('$v') ?? 0.0;
+  }
+
+  /// ---------- From JSON ----------
   factory Recipe.fromJson(Map<String, dynamic> json) {
     final map = (json['recipe'] is Map)
         ? (json['recipe'] as Map<String, dynamic>)
@@ -99,13 +110,14 @@ class Recipe {
 
       likesCount: _asInt(map['likesCount']),
       likes: ((map['likes'] as List?) ?? []).map((e) => e.toString()).toList(),
+
+      imageUrl: map['imageUrl']?.toString(),
     );
   }
 
-  // Utilidad para UI (saber si un usuario ya dio "me encanta")
+  /// ---------- Utilidades ----------
   bool likedBy(String userId) => likes.contains(userId);
 
-  // 🔹 Nuevo: copyWith para actualizar solo algunos campos sin perder el resto
   Recipe copyWith({
     String? id,
     String? title,
@@ -121,6 +133,7 @@ class Recipe {
     String? autorId,
     int? likesCount,
     List<String>? likes,
+    String? imageUrl,
   }) {
     return Recipe(
       id: id ?? this.id,
@@ -137,6 +150,7 @@ class Recipe {
       autorId: autorId ?? this.autorId,
       likesCount: likesCount ?? this.likesCount,
       likes: likes ?? this.likes,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

@@ -101,20 +101,22 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 final liked = widget.userId != null && r.likedBy(widget.userId!);
 
                 return ListTile(
-                  leading: CircleAvatar(
-                    radius: 22,
-                    backgroundColor: AppColors.surfaceAlt,
-                    child: Text(
-                      r.title.isNotEmpty ? r.title[0].toUpperCase() : "R",
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: (r.imageUrl != null && r.imageUrl!.isNotEmpty)
+                        ? Image.network(
+                            r.imageUrl!,
+                            width: 64, height: 64, fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+                          )
+                        : const Icon(Icons.image, size: 32),
                   ),
                   title: Text(r.title),
                   subtitle: Text(
                     "⏱ ${r.prepTime} • Cal: ${r.calories} • Prot: ${r.protein}g • Gras: ${r.fat}g\n"
                     "💲 ${r.avgCost}",
-                    style: const TextStyle(height: 1.4),
                   ),
+
                   trailing: LikeSwitcher(
                     liked: liked,
                     count: r.likesCount,
